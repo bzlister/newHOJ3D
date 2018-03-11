@@ -35,8 +35,8 @@ def prepData(data, person):
     index = 0
     for j in range (0, 10):
         if (index < len(data['frame'])):
-            lowFrame = labels[j][0]
-            highFrame = labels[j][1]
+            lowFrame = labels[j][1]
+            highFrame = labels[j][2]
             frameData = int(highFrame-lowFrame+1)*[0]
             q = True
             while (q & (data['frame'][index] < lowFrame)):
@@ -54,7 +54,7 @@ def prepData(data, person):
                 zL = data['left hip'][2][index]
                 zR = data['right hip'][2][index]
                 mag = math.sqrt(math.pow(xL-xR, 2)+math.pow(zL-zR, 2))
-                href = [(xL-xR)/mag, 0, (zL-zR)/mag)]
+                href = [(xL-xR)/mag, 0, (zL-zR)/mag]
                 vref = [0, 1, 0]
                 frameData[index-index2] = []
                 for k in range (0, 9):
