@@ -2,6 +2,7 @@ import math
 import os, os.path
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 from mpl_toolkits.mplot3d import Axes3D
 import re
 import numpy as np
@@ -37,7 +38,7 @@ def prepData(data, person):
         if (index < len(data['frame'])):
             lowFrame = labels[j][1]
             highFrame = labels[j][2]
-            frameData = int(highFrame-lowFrame+1)*[0]
+            frameData = []          
             q = True
             while (q & (data['frame'][index] < lowFrame)):
                 index+=1
@@ -56,13 +57,15 @@ def prepData(data, person):
                 mag = math.sqrt(math.pow(xL-xR, 2)+math.pow(zL-zR, 2))
                 href = [(xL-xR)/mag, 0, (zL-zR)/mag]
                 vref = [0, 1, 0]
-                frameData[index-index2] = []
+                frameData.append([])
                 for k in range (0, 9):
                     x = data[joints[k]][0][index] - x0
                     y = data[joints[k]][1][index] - y0
                     z = data[joints[k]][2][index] - z0
                     alpha = math.acos(vm.dotProduct([x,y,z], href)/vm.getMagnitude([x,0,z]))
                     theta = math.acos(vm.dotProduct([x,y,z], vref)/vm.getMagnitude([x,y,0]))
+                    if ((x < 0) & (y > 0) & (z < 0) & (href[0] > 0) & (href[2] < 0)):
+                        print(x,y,z,href,alpha,theta)
                     while ((alpha <= -math.pi) | (alpha >= math.pi)):
                         alpha+=-math.copysign(1, alpha)*2*math.pi
                     while ((theta <= -math.pi) & (theta >= math.pi)):
