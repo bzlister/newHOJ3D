@@ -46,7 +46,7 @@ def prepData(data, person):
                     index-=1
                     q = False
             index2 = index
-            while ((data['frame'][index] < highFrame) & q):
+            while ((data['frame'][index] <= highFrame) & q):
                 x0 = data['hip center'][0][index]
                 y0 = data['hip center'][1][index]
                 z0 = data['hip center'][2][index]
@@ -63,7 +63,7 @@ def prepData(data, person):
                     y = data[joints[k]][1][index] - y0
                     z = data[joints[k]][2][index] - z0
                     alpha = math.acos(vm.dotProduct([x,y,z], href)/vm.getMagnitude([x,0,z]))
-                    theta = math.acos(vm.dotProduct([x,y,z], vref)/vm.getMagnitude([x,y,0]))
+                    theta = math.acos(vm.dotProduct([x,y,z], vref)/vm.getMagnitude([x,y,z]))
                     while ((alpha <= -math.pi) | (alpha >= math.pi)):
                         alpha+=-math.copysign(1, alpha)*2*math.pi
                     while ((theta <= -math.pi) & (theta >= math.pi)):
