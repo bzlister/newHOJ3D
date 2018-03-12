@@ -35,16 +35,20 @@ def statistics(angles):
         thetaDev[x] = [math.sqrt((1/actualFrames)*q) for q in thetaActionDev]
     return [alphaMean, thetaMean, alphaDev, thetaDev]
 
-#Returns a 100-bin histogram with probability calculations in 9 or fewer bins, depending on the position of the joint
-def getHisto(alpha, theta, alphaMean, thetaMean, alphaDev, thetaDev):
+#Returns a 100-bin histogram
+#A histogram represents a single posture (frame in action)
+def getHisto(joints, alphaMeans, thetaMeans, alphaDevs, thetaDevs):
     bins= [0]*10
     for i in range(0, 10):
         bins[i] = [0]*10
     
     delta = math.pi/10
-    alphaStart = int(alpha/delta)
-    thetaStart = int(theta/delta)
-    for n in range(max(alphaStart-1, 0), min(alphaStart+2, 10)):
-        for m in range(max(thetaStart-1, 0), min(thetaStart+2, 10)):
-            bins[n][m] = (st.norm.cdf(((n+1)*delta - alphaMean)/alphaDev) - st.norm.cdf((n*delta-alphaMean)/alphaDev))*(st.norm.cdf(((m+1)*delta - thetaMean)/thetaDev) - st.norm.cdf((m*delta - thetaMean)/thetaDev))
+    for j in range(0, 9):
+        alphaStart = int(joints[j][0]/delta)
+        thetaStart = int(joints[j][0]/delta)
+        for n in range(max(alphaStart-1, 0), min(alphaStart+2, 10)):
+            for m in range(max(thetaStart-1, 0), min(thetaStart+2, 10)):
+                alphaVote = st.norm.cdf(((n+1)*delta - alphaMeans[j])/alphaDevs[j]) - st.norm.cdf((n*delta-alphaMeans[j])/alphaDevs[j])
+                thetaVote = st.norm.cdf(((m+1)*delta - thetaMeans[j])/thetaDevs[j]) - st.norm.cdf((m*delta - thetaMeans[j])/thetaDevs[j])
+                bins[n][m]+=alphaVote*thetaVote
     return bins
