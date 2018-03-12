@@ -1,4 +1,5 @@
 import math
+import scipy.stats as st
 
 #[alpha/theta mean/deviations][action][joint]
 def statistics(angles):
@@ -27,11 +28,23 @@ def statistics(angles):
             if (angles[x][y] != 0):
                 actualFrames+=1
                 for z in range(0, 9):
-                    print(x,y,z)
                     alphaActionDev[z]+=math.pow(angles[x][y][z][0]-alphaMean[x][z], 2)
                     thetaActionDev[z]+=math.pow(angles[x][y][z][1]-thetaMean[x][z], 2)
         
         alphaDev[x] = [math.sqrt((1/actualFrames)*q) for q in alphaActionDev]
         thetaDev[x] = [math.sqrt((1/actualFrames)*q) for q in thetaActionDev]
     return [alphaMean, thetaMean, alphaDev, thetaDev]
-            
+
+def getHisto(alpha, theta, alphaMean, thetaMean, alphaDev, thetaDev):
+    bins= [0]*10
+    for i in range(0, 10):
+        bins[i] = [0]*10
+    
+    delta = math.pi/10
+    alphaStart = int(alpha/delta)
+    thetaStart = int(theta/delta)
+    print(alphaStart, thetaStart)
+    for n in range(max(alphaStart-1, 0), min(alphaStart+2, 10)):
+        for m in range(max(thetaStart-1, 0), min(thetaStart+2, 10)):
+            bins[n][m] = (st.norm.cdf(((n+1)*delta - alphaMean)/alphaDev) - st.norm.cdf((n*delta-alphaMean)/alphaDev))*(st.norm.cdf(((m+1)*delta - thetaMean)/thetaDev) - st.norm.cdf((m*delta - thetaMean)/thetaDev))
+    return bins
