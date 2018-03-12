@@ -33,8 +33,8 @@ def prepData(data, person):
     joints = ['head', 'left elbow', 'right elbow', 'left hand', 'right hand', 'left knee', 'right knee', 'left foot', 'right foot']
     labels = getLabels(person)
     angleData = 10*[0]
-    index = 0
     for j in range (0, 10):
+        index = 0
         if (index < len(data['frame'])):
             lowFrame = labels[j][1]
             highFrame = labels[j][2]
@@ -64,8 +64,6 @@ def prepData(data, person):
                     z = data[joints[k]][2][index] - z0
                     alpha = math.acos(vm.dotProduct([x,y,z], href)/vm.getMagnitude([x,0,z]))
                     theta = math.acos(vm.dotProduct([x,y,z], vref)/vm.getMagnitude([x,y,0]))
-                    if ((x < 0) & (y > 0) & (z < 0) & (href[0] > 0) & (href[2] < 0)):
-                        print(x,y,z,href,alpha,theta)
                     while ((alpha <= -math.pi) | (alpha >= math.pi)):
                         alpha+=-math.copysign(1, alpha)*2*math.pi
                     while ((theta <= -math.pi) & (theta >= math.pi)):
