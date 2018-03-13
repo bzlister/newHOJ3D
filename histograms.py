@@ -44,4 +44,4 @@ def getHisto(joints, alphaMeans, thetaMeans, alphaDevs, thetaDevs):
                 alphaVote = st.norm.cdf(((n+1)*delta - alphaMeans[j])/alphaDevs[j]) - st.norm.cdf((n*delta-alphaMeans[j])/alphaDevs[j])
                 thetaVote = st.norm.cdf(((m+1)*delta - thetaMeans[j])/thetaDevs[j]) - st.norm.cdf((m*delta - thetaMeans[j])/thetaDevs[j])
                 bins[n][m]+=alphaVote*thetaVote
-    return np.array(bins).flatten()
+    return np.array(bins).flatten().tolist()
