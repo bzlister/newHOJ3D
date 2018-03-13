@@ -1,5 +1,6 @@
 import math
 import scipy.stats as st
+import numpy as np
 
 #Finds mean and standard deviation of alpha and theta for a specific joint, across all frames in a specific action
 #[alpha/theta mean/deviations][action][joint]
@@ -39,8 +40,8 @@ def statistics(angles):
 #A histogram represents a single posture (frame in action)
 def getHisto(joints, alphaMeans, thetaMeans, alphaDevs, thetaDevs):
     bins= [0]*10
-    for i in range(0, 10):
-        bins[i] = [0]*10
+    for b in range(0, 10):
+        bins[b] = [0]*10
     
     delta = math.pi/10
     for j in range(0, 9):
@@ -51,4 +52,4 @@ def getHisto(joints, alphaMeans, thetaMeans, alphaDevs, thetaDevs):
                 alphaVote = st.norm.cdf(((n+1)*delta - alphaMeans[j])/alphaDevs[j]) - st.norm.cdf((n*delta-alphaMeans[j])/alphaDevs[j])
                 thetaVote = st.norm.cdf(((m+1)*delta - thetaMeans[j])/thetaDevs[j]) - st.norm.cdf((m*delta - thetaMeans[j])/thetaDevs[j])
                 bins[n][m]+=alphaVote*thetaVote
-    return bins
+    return np.array(bins).flatten()
