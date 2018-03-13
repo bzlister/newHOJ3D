@@ -4,6 +4,7 @@ import numpy as np
 
 #Returns an enormous Nx100 feature vector of bin votes and a Nx1 class vector of actions
 #using the entire dataset excepting the test entry and the last (19th) entry, which has missing data
+#Thanks to Sebastian Raschka for his excellent LDA tutorial http://sebastianraschka.com/Articles/2014_python_lda.html
 def setup(test):
     X = []
     Y = []

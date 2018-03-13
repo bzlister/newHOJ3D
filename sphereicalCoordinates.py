@@ -10,6 +10,7 @@ import random as rand
 import vectorMath as vm
 
 #Returns [joint][coordinate][frame]
+#Thanks to Lu Xia for her research and data http://cvrc.ece.utexas.edu/Publications/Xia_HAU3D12.pdf
 def getData(filename):
     table = pd.read_table(filename, header=None, delim_whitespace=True)
     data = {'frame': table[0],
