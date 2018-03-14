@@ -2,6 +2,7 @@ import sphereicalCoordinates
 import histograms
 import numpy as np
 from matplotlib import pyplot as plt
+import math
 
 #Returns an enormous Nx100 feature vector of bin votes and a Nx1 class vector of actions
 #using the entire dataset excepting the test entry and the last (19th) entry, which has missing data
@@ -10,18 +11,23 @@ def setup(test):
     X = np.array([0]*100)
     Y = []
     index = 0
-    for i in range(0, 19):
-        if (i != test):
-            sperson = str(int(i/2)+1)
-            strial = "0"+str(i%2+1)
-            if (i < 18):
-                sperson = "0"+sperson
-            filename = 'joints\\joints_s' + sperson + '_e' + strial + '.txt'
-            print(filename)
-            data = sphereicalCoordinates.prepData(sphereicalCoordinates.getData(filename), i)
-            stats = histograms.statistics(data)
-            #Every action
-            for j in range(0, 10):
+    datas = [0]*19
+    statss = [0]*19
+    #Every action
+    for j in range(0, 10):
+        for i in range(0, 19):
+            if (i != test):
+                sperson = str(int(i/2)+1)
+                strial = "0"+str(i%2+1)
+                if (i < 18):
+                    sperson = "0"+sperson
+                filename = 'joints\\joints_s' + sperson + '_e' + strial + '.txt'
+                if (datas[i] == 0):
+                    datas[i] = sphereicalCoordinates.prepData(sphereicalCoordinates.getData(filename), i)
+                data = datas[i]
+                if (statss[i] == 0):
+                    statss[i] = histograms.statistics(data)
+                stats = statss[i]
                 #Every frame
                 for k in range(0, len(data[j])):
                     #Compute a histogram representing a posture
@@ -59,11 +65,15 @@ def withinClassScatter(X, Y, meanVec):
     S_W = np.zeros((100, 100))
     for cl, mv in zip(range(0, 10), meanVec):
         class_sc_mat = np.zeros((100, 100))
-        while (Y[index] == cl):
+        while ((Y[index] == cl) & (index < len(Y)-1)):
             row = X[index].reshape(100, 1)
             mv = mv.reshape(100, 1)
             class_sc_mat += (row-mv).dot((row-mv).T)
             index+=1
+        if (index == len(Y)-1):
+            row = X[index].reshape(100, 1)
+            mv = mv.reshape(100, 1)
+            class_sc_mat += (row-mv).dot((row-mv).T)
         S_W += class_sc_mat
     return S_W
 
@@ -91,6 +101,57 @@ def eigen(S_W, S_B, X):
     X_lda = X.dot(W)
     return X_lda
 
+def k_means(k, X_lda, Y):
+    Y_pos = [0]*10
+    for a in range(1, 10):
+        Y_pos[a] = Y_pos[a-1] + Y.count(a-1)
+    
+    X_centroids = [0]*len(X_lda)
+    X_centroids_scores = [np.zeros(k)]*len(X_lda)
+    for i in range(0, 10):
+        length = int(Y.count(i)/k)
+        for t in range(0, k):
+            for u in range(Y_pos[i]+t*length, Y_pos[i]+t*length+length):
+                X_centroids[u] = t
+        for iterations in range(0, 1):
+            
+            
+            #Centroid calculation
+            centroid = [np.zeros(len(X_lda[0]))]*k
+
+            for h in range(0, k):
+                for q in range(Y_pos[i] + h*length, Y_pos[i]+h*length+length):
+                    centroid[X_centroids[q]] = centroid[X_centroids[q]] + X_lda[q].real
+            for h2 in range(0, k):
+                if (X_centroids[Y_pos[i] + length*h2:Y_pos[i] + length*h2 + length].count(h2) != 0):
+                    centroid[h2] = (1/X_centroids[Y_pos[i] + length*h2:Y_pos[i] + length*h2 + length].count(h2))*centroid[h2]
+
+            #Euclidean distance calculation
+            for b in range(Y_pos[i], Y_pos[i]+Y.count(i)):
+                minVal = 1000
+                for c in range(0, k):
+                    ssquared_dist = math.sqrt(sum((X_lda[b].real - centroid[c])*(X_lda[b].real - centroid[c])))
+                    #X_centroids_scores[b][c] = ssquared_dist
+                    if (ssquared_dist < minVal):
+                        minVal = ssquared_dist
+                        X_centroids[b] = c
+            #Centroid reassignment
+            #for c2 in range(0, k):
+                #top_scores = [Y_pos[i]]*length
+                #for b2 in range(Y_pos[i], Y_pos[i]+Y.count(i)):
+                    #for r2 in range(0, length):
+                        #if (X_centroids_scores[b2][c2] < X_centroids_scores[top_scores[r2]][c2]):
+                            #top_scores[r2] = b2
+                #for r3 in range(0, length):
+                    #X_centroids[top_scores[r3]] = c2
+
+            #if ((i == 0) & (iterations == 0)):
+                #print(X_centroids[0:Y.count(0)], X_centroids[Y.count(0)])
+
+    return X_centroids
+
+
+#Returns a visualization of the 3 most prominent discriminants
 def plotLDA(X_lda, Y):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
