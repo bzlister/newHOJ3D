@@ -29,6 +29,8 @@ def setup(test):
                     statss[i] = histograms.statistics(data)
                 stats = statss[i]
                 #Every frame
+                if (j == 0):
+                    print(len(data[j]))
                 for k in range(0, len(data[j])):
                     #Compute a histogram representing a posture
                     histo = histograms.getHisto(data[j][k], stats[0][j], stats[1][j], stats[2][j], stats[3][j])
@@ -88,18 +90,31 @@ def betweenClassScatter(X, Y, meanVec):
 
 def eigen(S_W, S_B, X):
     eig_vals, eig_vecs = np.linalg.eig(np.linalg.inv(S_W).dot(S_B))
-
     for i in range(len(eig_vals)):
         eigvec_sc = eig_vecs[:,i].reshape(100,1)
+        np.testing.assert_array_almost_equal(np.linalg.inv(S_W).dot(S_B).dot(eigvec_sc),
+                                         eig_vals[i] * eigvec_sc,
+                                         decimal=6, err_msg='', verbose=True)
     eig_pairs = [(np.abs(eig_vals[i]), eig_vecs[:,i]) for i in range(len(eig_vals))]
     eig_pairs = sorted(eig_pairs, key=lambda k: k[0], reverse=True)
     eigv_sum = sum(eig_vals)
     for i,j in enumerate(eig_pairs):
         print('eigenvalue {0:}: {1:.2%}'.format(i+1, (j[0]/eigv_sum).real))
+        if ((i > 9) & ((j[0]/eigv_sum).real > 0.005)):
+            print("WARNING! Losing influential data! (Top 10 eigenvalues explain less than 99.5 percent of total variance)")
     
-    W = np.hstack((eig_pairs[0][1].reshape(100,1), eig_pairs[1][1].reshape(100, 1), eig_pairs[2][1].reshape(100, 1), eig_pairs[3][1].reshape(100, 1), eig_pairs[4][1].reshape(100, 1), eig_pairs[5][1].reshape(100, 1)))
+    W = np.hstack((eig_pairs[0][1].reshape(100,1), 
+                eig_pairs[1][1].reshape(100, 1), 
+                eig_pairs[2][1].reshape(100, 1), 
+                eig_pairs[3][1].reshape(100, 1), 
+                eig_pairs[4][1].reshape(100, 1), 
+                eig_pairs[5][1].reshape(100, 1),
+                eig_pairs[6][1].reshape(100, 1),
+                eig_pairs[7][1].reshape(100, 1),
+                eig_pairs[8][1].reshape(100, 1),
+                eig_pairs[9][1].reshape(100, 1)))
     X_lda = X.dot(W)
-    return X_lda
+    return X_lda.real
 
 def k_means(k, X_lda, Y):
     Y_pos = [0]*10
